@@ -1,26 +1,39 @@
-﻿using DevFreela.Application.Services.Interfaces;
+﻿using Dapper;
+using DevFreela.Application.Services.Interfaces;
 using DevFreela.Infrastructure.Persistence;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 
 namespace DevFreela.Application.Services.Implementations
 {
-    internal class SkillService : ISkillService
-    {
-        private readonly DevFreelaDbContext _dbContext;
+	internal class SkillService : ISkillService
+	{
+		private readonly DevFreelaDbContext _dbContext;
+		private readonly string _connectionString;
 
-        public SkillService(DevFreelaDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+		public SkillService(DevFreelaDbContext dbContext, IConfiguration configuration)
+		{
+			_dbContext = dbContext;
+			_connectionString = configuration.GetConnectionString("DevFreelaCs");
+		}
 
-        public List<SkillViewModel> GetAll()
-        {
-            var skills = _dbContext.Skills;
+		public List<SkillViewModel> GetAll()
+		{
+			using (var sqlConnection = new SqlConnection(_connectionString))
+			{
+				sqlConnection.Open();
+				
+				var script = "SELECT Id, Description FROM Skills";
+				
+				return sqlConnection.Query<SkillViewModel>(script).ToList();
+			}
+			// var skills = _dbContext.Skills;
 
-            var skillsViewModel = skills
-                .Select(s => new SkillViewModel(s.Id, s.Description))
-                .ToList();
+			// var skillsViewModel = skills
+			// 	.Select(s => new SkillViewModel(s.Id, s.Description))
+			// 	.ToList();
 
-            return skillsViewModel;
-        }
-    }
+			// return skillsViewModel;
+		}
+	}
 }
