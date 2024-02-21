@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace DevFreela.Application.Services.Implementations
 {
-	internal class SkillService : ISkillService
+	public class SkillService : ISkillService
 	{
 		private readonly DevFreelaDbContext _dbContext;
 		private readonly string _connectionString;
