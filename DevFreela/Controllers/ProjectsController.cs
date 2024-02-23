@@ -1,98 +1,102 @@
 ﻿using DevFreela.API.Models;
+using DevFreela.Application.Commands.CreateProject;
 using DevFreela.Application.InputModels;
 using DevFreela.Application.Services.Interfaces;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
 namespace DevFreela.API.Controllers
 {
-    [Route("api/projects")]
-    public class ProjectsController : ControllerBase
-    {
-        private readonly IProjectService _projectService;
-        public ProjectsController(IProjectService projectService)
-        {
-            _projectService = projectService;
-        }
+	[Route("api/projects")]
+	public class ProjectsController : ControllerBase
+	{
+		private readonly IProjectService _projectService;
+		private readonly IMediator _mediator;
+		public ProjectsController(IProjectService projectService, IMediator mediator)
+		{
+			_projectService = projectService;
+			_mediator = mediator;
+		}
 
-        [HttpGet]
-        public IActionResult Get(string query)
-        {
-            var projects = _projectService.GetAll(query);
+		[HttpGet]
+		public IActionResult Get(string query)
+		{
+			var projects = _projectService.GetAll(query);
 
-            return Ok(projects);
-        }
+			return Ok(projects);
+		}
 
-        // api/projects/2
-        [HttpGet("{id}")]
-        public IActionResult GetById(int id)
-        {
-            var project = _projectService.GetById(id);
+		// api/projects/2
+		[HttpGet("{id}")]
+		public IActionResult GetById(int id)
+		{
+			var project = _projectService.GetById(id);
 
-            if (project == null)
-            {
-                return NotFound();
-            }
+			if (project == null)
+			{
+				return NotFound();
+			}
 
-            return Ok(project);
-        }
+			return Ok(project);
+		}
 
-        [HttpPost]
-        public IActionResult Post([FromBody] NewProjectInputModel inputModel)
-        {
-            if (inputModel.Title.Length > 50)
-            {
-                return BadRequest();
-            }
+		[HttpPost]
+		public async Task<IActionResult> Post([FromBody] CreateProjectCommand command)
+		{
+			if (command.Title.Length > 50)
+			{
+				return BadRequest();
+			}
 
-            var id = _projectService.Create(inputModel);
+			var id = await _mediator.Send(command);
 
-            return CreatedAtAction(nameof(GetById), new {id = id }, inputModel);
-        }
+			return CreatedAtAction(nameof(GetById), new {id = id }, command);
+		}
 
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] UpdateProjectInputModel inputModel)
-        {
-            if (inputModel.Description.Length > 200)
-            {
-                return BadRequest();
-            }
+		[HttpPut("{id}")]
+		public IActionResult Put(int id, [FromBody] UpdateProjectInputModel inputModel)
+		{
+			if (inputModel.Description.Length > 200)
+			{
+				return BadRequest();
+			}
 
-            _projectService.Update(inputModel);
+			_projectService.Update(inputModel);
 
-            return NoContent();
-        }
+			return NoContent();
+		}
 
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
-        {
-            _projectService.Delete(id);
+		[HttpDelete("{id}")]
+		public IActionResult Delete(int id)
+		{
+			_projectService.Delete(id);
 
-            return NoContent();
-        }
+			return NoContent();
+		}
 
-        [HttpPost("{id}/comments")]
-        public IActionResult PostComment(int id, [FromBody] CreateCommentInputModel inputModel)
-        {
-            _projectService.CreateComment(inputModel);
+		[HttpPost("{id}/comments")]
+		public IActionResult PostComment(int id, [FromBody] CreateCommentInputModel inputModel)
+		{
+			_projectService.CreateComment(inputModel);
 
-            return NoContent();
-        }
+			return NoContent();
+		}
 
-        [HttpPut("{id}/start")]
-        public IActionResult Start(int id)
-        {
-            _projectService.Start(id);
+		[HttpPut("{id}/start")]
+		public IActionResult Start(int id)
+		{
+			_projectService.Start(id);
 
-            return NoContent();
-        }
+			return NoContent();
+		}
 
-        [HttpPut("{id}/finish")]
-        public IActionResult Finish(int id)
-        {
-            _projectService.Finish(id);
+		[HttpPut("{id}/finish")]
+		public IActionResult Finish(int id)
+		{
+			_projectService.Finish(id);
 
-            return NoContent();
-        }
-    }
+			return NoContent();
+		}
+	}
 }
