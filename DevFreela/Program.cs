@@ -27,7 +27,6 @@ builder.Services.AddDbContext<DevFreelaDbContext>(options => options.UseSqlServe
 
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<ISkillService, SkillService>();
 
 
 var app = builder.Build();

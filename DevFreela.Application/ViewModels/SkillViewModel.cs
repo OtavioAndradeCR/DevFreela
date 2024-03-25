@@ -1,4 +1,4 @@
-﻿namespace DevFreela.Application.Services.Interfaces
+﻿namespace DevFreela.Application.ViewModels
 {
     public class SkillViewModel
     {
