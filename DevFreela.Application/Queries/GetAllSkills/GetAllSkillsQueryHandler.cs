@@ -4,32 +4,32 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using DevFreela.Application.ViewModels;
+using DevFreela.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace DevFreela.Application.Queries.GetAllSkills
 {
 	public class GetAllSkillsQueryHandler : IRequestHandler<GetAllSkillsQuery, List<SkillViewModel>>
 	{
-		private readonly string _connectionString;
+		private readonly DevFreelaDbContext _dbContext;
 
-		public GetAllSkillsQueryHandler(IConfiguration configuration)
+		public GetAllSkillsQueryHandler(DevFreelaDbContext dbContext)
 		{
-			_connectionString = configuration.GetConnectionString("DevFreelaCs");
+			_dbContext = dbContext;
 		}
+
 		public async Task<List<SkillViewModel>> Handle(GetAllSkillsQuery request, CancellationToken cancellationToken)
 		{
-			using (var sqlConnection = new SqlConnection(_connectionString))
-			{
-				sqlConnection.Open();
+			var skills = _dbContext.Skills;
 
-				var script = "SELECT Id, Description FROM Skills";
+			var skiilsViewModel = await skills
+				.Select(skill => new SkillViewModel(skill.Id, skill.Description))
+				.ToListAsync();
 
-				var skills = await sqlConnection.QueryAsync<SkillViewModel>(script);
-				
-				return skills.ToList();
-			}
+			return skiilsViewModel;
 		}
 	}
 }

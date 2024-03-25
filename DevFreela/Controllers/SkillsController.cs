@@ -1,5 +1,4 @@
 ﻿using DevFreela.Application.Queries.GetAllSkills;
-using DevFreela.Application.Services.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,7 +17,7 @@ namespace DevFreela.API.Controllers
 		public async Task<IActionResult> Get()
 		{
 			var query = new GetAllSkillsQuery();
-			
+
 			var skills = await _mediator.Send(query);
 
 			return Ok(skills);
