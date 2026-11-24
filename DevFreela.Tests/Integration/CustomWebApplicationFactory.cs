@@ -3,7 +3,6 @@ using DevFreela.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -19,7 +18,19 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
         builder.ConfigureServices(services =>
         {
-            services.RemoveAll<IDbContextOptionsConfiguration<DevFreelaDbContext>>();
+            var dbContextOptionsConfiguration = services
+                .Where(descriptor =>
+                    descriptor.ServiceType.IsGenericType &&
+                    descriptor.ServiceType.GetGenericTypeDefinition().FullName ==
+                    "Microsoft.EntityFrameworkCore.Infrastructure.IDbContextOptionsConfiguration`1" &&
+                    descriptor.ServiceType.GenericTypeArguments[0] == typeof(DevFreelaDbContext))
+                .ToList();
+
+            foreach (var descriptor in dbContextOptionsConfiguration)
+            {
+                services.Remove(descriptor);
+            }
+
             services.RemoveAll<DbContextOptions<DevFreelaDbContext>>();
             services.RemoveAll<DevFreelaDbContext>();
             services.RemoveAll<IDevFreelaDbContext>();
