@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DevFreela.Core.Entities;
-using DevFreela.Infrastructure.Persistence;
+using DevFreela.Application.Persistence;
 using MediatR;
 
 namespace DevFreela.Application.Commands.CreateComment
 {
     public class CreateCommentCommandHandler : IRequestHandler<CreateCommentCommand, Unit>
     {
-        private readonly DevFreelaDbContext _dbContext;
+        private readonly IDevFreelaDbContext _dbContext;
 
         public CreateCommentCommandHandler(DevFreelaDbContext dbContext)
         {
@@ -21,8 +21,8 @@ namespace DevFreela.Application.Commands.CreateComment
         {
             var comment = new ProjectComment(request.Content, request.IdProject, request.IdUser);
 
-            await _dbContext.ProjectComments.AddAsync(comment);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.ProjectComments.AddAsync(comment, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             return Unit.Value;
         }
