@@ -11,10 +11,11 @@ O projeto permite cadastrar usuários, consultar projetos e habilidades, acompan
 - Entity Framework Core 8 e SQL Server
 - MediatR
 - Swagger / OpenAPI
+- xUnit para testes automatizados
 
 ## Organização da solução
 
-A solução é dividida em quatro projetos:
+A solução é dividida em cinco projetos:
 
 | Projeto | Responsabilidade |
 |---|---|
@@ -22,6 +23,7 @@ A solução é dividida em quatro projetos:
 | `DevFreela.Application` | Casos de uso, comandos, consultas, serviços e modelos de resposta |
 | `DevFreela.Core` | Entidades, enums, regras de domínio e contratos de repositório |
 | `DevFreela.Infrastructure` | Persistência com Entity Framework Core, mapeamentos e repositórios |
+| `DevFreela.Tests` | Testes automatizados das regras de domínio e dos casos de uso |
 
 A camada Application depende de abstrações de persistência definidas em seu próprio projeto. A implementação concreta do contexto fica em Infrastructure, registrada no container de injeção de dependências.
 
@@ -77,7 +79,7 @@ Ajuste a connection string `DevFreelaCs` em `DevFreela/appsettings.json` para ap
 
 Não utilize credenciais reais em arquivos versionados. Para ambientes compartilhados, prefira configurar a connection string por variáveis de ambiente ou Secret Manager.
 
-### Executar
+### Executar a API
 
 Na raiz do repositório:
 
@@ -88,6 +90,16 @@ dotnet run --project DevFreela/DevFreela.API.csproj
 
 Em ambiente de desenvolvimento, a documentação Swagger é disponibilizada pela própria aplicação. Consulte a URL exibida no terminal após a inicialização.
 
+## Testes automatizados
+
+O projeto `DevFreela.Tests` utiliza xUnit e, neste primeiro conjunto, cobre as regras de transição de estado da entidade `Project`: criação, início, finalização e cancelamento, incluindo transições inválidas.
+
+Para executar todos os testes da solução, utilize na raiz do repositório:
+
+```bash
+dotnet test DevFreela.sln
+```
+
 ## Observações sobre o escopo
 
 - O endpoint de login não implementa autenticação, emissão de tokens ou validação de credenciais.
@@ -97,4 +109,4 @@ Em ambiente de desenvolvimento, a documentação Swagger é disponibilizada pela
 
 ---
 
-Projeto de portfólio para demonstrar desenvolvimento backend com .NET, organização em camadas, MediatR, Entity Framework Core e modelagem de regras de negócio.
+Projeto de portfólio para demonstrar desenvolvimento backend com .NET, organização em camadas, MediatR, Entity Framework Core, modelagem de regras de negócio e testes automatizados.
