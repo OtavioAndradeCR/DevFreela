@@ -1,4 +1,4 @@
-using DevFreela.Infrastructure.Persistence;
+using DevFreela.Application.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,7 +6,7 @@ namespace DevFreela.Application.Commands.Delete
 {
     public class DeleteProjectCommandHandler : IRequestHandler<DeleteProjectCommand, bool>
     {
-        private readonly DevFreelaDbContext _dbContext;
+        private readonly IDevFreelaDbContext _dbContext;
 
         public DeleteProjectCommandHandler(DevFreelaDbContext dbContext)
         {
