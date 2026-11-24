@@ -9,7 +9,7 @@ namespace DevFreela.Application.Services.Implementations
     {
         private readonly IDevFreelaDbContext _dbContext;
 
-        public ProjectService(DevFreelaDbContext dbContext)
+        public ProjectService(IDevFreelaDbContext dbContext)
         {
             _dbContext = dbContext;
         }
