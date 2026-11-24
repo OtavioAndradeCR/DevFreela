@@ -14,7 +14,7 @@ namespace DevFreela.Application.Services.Implementations
     public class UserService : IUserService
     {
         private readonly IDevFreelaDbContext _dbContext;
-        public UserService(DevFreelaDbContext dbContext)
+        public UserService(IDevFreelaDbContext dbContext)
         {
             _dbContext = dbContext;
         }
