@@ -63,8 +63,8 @@ namespace DevFreela.API.Controllers
         public async Task<IActionResult> PostComment(int id, [FromBody] CreateCommentCommand command)
         {
             command.IdProject = id;
-            await _mediator.Send(command);
-            return NoContent();
+            var created = await _mediator.Send(command);
+            return created ? NoContent() : NotFound();
         }
 
         [HttpPut("{id:int}/start")]
