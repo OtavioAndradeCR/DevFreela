@@ -92,13 +92,34 @@ Em ambiente de desenvolvimento, a documentação Swagger é disponibilizada pela
 
 ## Testes automatizados
 
-O projeto `DevFreela.Tests` utiliza xUnit e Entity Framework Core InMemory. A suíte cobre as regras de transição de estado da entidade `Project` e os handlers de criação, atualização, cancelamento e comentários, incluindo cenários de sucesso e registros inexistentes.
+O projeto `DevFreela.Tests` utiliza xUnit, Entity Framework Core InMemory e `WebApplicationFactory` para executar testes unitários e de integração sem depender de uma instância real do SQL Server.
+
+A suíte possui **45 testes automatizados**, organizados por responsabilidade:
+
+| Grupo | Quantidade | Cobertura |
+|---|---:|---|
+| Domínio | 9 | Regras e transições de estado das entidades |
+| Handlers | 9 | Execução dos casos de uso e cenários de sucesso e falha |
+| ProjectService | 11 | Consulta, início e finalização de projetos |
+| UserService | 3 | Cadastro e consulta de usuários |
+| Integração da API | 13 | Endpoints HTTP, códigos de resposta, persistência e ciclo de vida dos projetos |
+| **Total** | **45** | |
+
+Os testes de integração substituem o contexto SQL Server por um banco InMemory isolado para cada instância da aplicação de teste. Assim, é possível validar o comportamento HTTP da API sem configurar um banco externo.
 
 Para executar todos os testes da solução, utilize na raiz do repositório:
 
 ```bash
 dotnet test DevFreela.sln
 ```
+
+Para executar somente os testes de integração:
+
+```bash
+dotnet test DevFreela.sln --filter "FullyQualifiedName~Integration"
+```
+
+A suíte foi validada localmente com **45 testes aprovados, nenhuma falha e nenhum teste ignorado**.
 
 ## Observações sobre o escopo
 
