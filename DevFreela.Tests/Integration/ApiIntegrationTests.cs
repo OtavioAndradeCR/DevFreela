@@ -115,6 +115,94 @@ public sealed class ApiIntegrationTests : IDisposable
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
 
+    [Fact]
+    public async Task GetSkills_WhenNoSkillsExist_ShouldReturnOkAndEmptyList()
+    {
+        var response = await _client.GetAsync("/api/skills");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var skills = await response.Content.ReadFromJsonAsync<List<JsonElement>>();
+        Assert.NotNull(skills);
+        Assert.Empty(skills);
+    }
+
+    [Fact]
+    public async Task UpdateProject_WhenProjectExists_ShouldReturnNoContentAndPersistChanges()
+    {
+        var clientId = await CreateUserAsync("Cliente");
+        var freelancerId = await CreateUserAsync("Freelancer");
+        var projectId = await CreateProjectAsync(clientId, freelancerId);
+
+        var updateResponse = await _client.PutAsJsonAsync($"/api/projects/{projectId}", new
+        {
+            Title = "Projeto atualizado",
+            Description = "Descrição atualizada pelo teste de integração.",
+            TotalCost = 2500m
+        });
+
+        Assert.Equal(HttpStatusCode.NoContent, updateResponse.StatusCode);
+
+        var getResponse = await _client.GetAsync($"/api/projects/{projectId}");
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+
+        var project = await getResponse.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal("Projeto atualizado", project.GetProperty("title").GetString());
+        Assert.Equal("Descrição atualizada pelo teste de integração.", project.GetProperty("description").GetString());
+        Assert.Equal(2500m, project.GetProperty("totalCost").GetDecimal());
+    }
+
+    [Fact]
+    public async Task UpdateProject_WhenProjectDoesNotExist_ShouldReturnNotFound()
+    {
+        var response = await _client.PutAsJsonAsync("/api/projects/999", new
+        {
+            Title = "Projeto atualizado",
+            Description = "Descrição atualizada.",
+            TotalCost = 2500m
+        });
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CancelProject_WhenProjectCanBeCancelled_ShouldReturnNoContent()
+    {
+        var clientId = await CreateUserAsync("Cliente");
+        var freelancerId = await CreateUserAsync("Freelancer");
+        var projectId = await CreateProjectAsync(clientId, freelancerId);
+
+        var response = await _client.PutAsync($"/api/projects/{projectId}/cancel", null);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CancelProject_WhenProjectIsFinished_ShouldReturnConflict()
+    {
+        var clientId = await CreateUserAsync("Cliente");
+        var freelancerId = await CreateUserAsync("Freelancer");
+        var projectId = await CreateProjectAsync(clientId, freelancerId);
+
+        var startResponse = await _client.PutAsync($"/api/projects/{projectId}/start", null);
+        Assert.Equal(HttpStatusCode.NoContent, startResponse.StatusCode);
+
+        var finishResponse = await _client.PutAsync($"/api/projects/{projectId}/finish", null);
+        Assert.Equal(HttpStatusCode.NoContent, finishResponse.StatusCode);
+
+        var cancelResponse = await _client.PutAsync($"/api/projects/{projectId}/cancel", null);
+
+        Assert.Equal(HttpStatusCode.Conflict, cancelResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task CancelProject_WhenProjectDoesNotExist_ShouldReturnNotFound()
+    {
+        var response = await _client.PutAsync("/api/projects/999/cancel", null);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
     private async Task<int> CreateUserAsync(string role)
     {
         var response = await _client.PostAsJsonAsync("/api/users", new
