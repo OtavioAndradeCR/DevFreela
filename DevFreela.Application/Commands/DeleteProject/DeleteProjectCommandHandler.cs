@@ -8,7 +8,7 @@ namespace DevFreela.Application.Commands.Delete
     {
         private readonly IDevFreelaDbContext _dbContext;
 
-        public DeleteProjectCommandHandler(DevFreelaDbContext dbContext)
+        public DeleteProjectCommandHandler(IDevFreelaDbContext dbContext)
         {
             _dbContext = dbContext;
         }
