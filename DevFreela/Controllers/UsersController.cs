@@ -28,9 +28,9 @@ namespace DevFreela.API.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] CreateUserInputModel inputModel)
+        public async Task<IActionResult> Post([FromBody] CreateUserInputModel inputModel, CancellationToken cancellationToken)
         {
-            var id = _userService.Create(inputModel);
+            var id = await _userService.Create(inputModel, cancellationToken);
             return CreatedAtAction(nameof(GetByIdAsync), new { id }, inputModel);
         }
 
