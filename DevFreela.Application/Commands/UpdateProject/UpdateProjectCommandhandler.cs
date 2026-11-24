@@ -1,4 +1,4 @@
-using DevFreela.Infrastructure.Persistence;
+using DevFreela.Application.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,7 +6,7 @@ namespace DevFreela.Application.Commands.UpdateProject
 {
     public class UpdateProjectCommandhandler : IRequestHandler<UpdateProjectCommand, bool>
     {
-        private readonly DevFreelaDbContext _dbContext;
+        private readonly IDevFreelaDbContext _dbContext;
 
         public UpdateProjectCommandhandler(DevFreelaDbContext dbContext)
         {
