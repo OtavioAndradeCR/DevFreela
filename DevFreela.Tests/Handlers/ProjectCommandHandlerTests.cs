@@ -5,6 +5,7 @@ using DevFreela.Application.Commands.UpdateProject;
 using DevFreela.Application.Persistence;
 using DevFreela.Core.Entities;
 using DevFreela.Core.Enums;
+using DevFreela.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
@@ -12,13 +13,13 @@ namespace DevFreela.Tests.Handlers;
 
 public class ProjectCommandHandlerTests
 {
-    private static TestDbContext CreateContext()
+    private static DevFreelaDbContext CreateContext()
     {
-        var options = new DbContextOptionsBuilder<TestDbContext>()
+        var options = new DbContextOptionsBuilder<DevFreelaDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        return new TestDbContext(options);
+        return new DevFreelaDbContext(options);
     }
 
     [Fact]
@@ -233,15 +234,3 @@ public class ProjectCommandHandlerTests
     }
 }
 
-internal sealed class TestDbContext : DbContext, IDevFreelaDbContext
-{
-    public TestDbContext(DbContextOptions<TestDbContext> options) : base(options)
-    {
-    }
-
-    public DbSet<Project> Projects { get; set; }
-    public DbSet<User> Users { get; set; }
-    public DbSet<Skill> Skills { get; set; }
-    public DbSet<UserSkill> UserSkills { get; set; }
-    public DbSet<ProjectComment> ProjectComments { get; set; }
-}
