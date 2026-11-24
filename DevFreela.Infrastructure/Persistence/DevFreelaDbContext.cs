@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using DevFreela.Core.Entities;
+using DevFreela.Application.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevFreela.Infrastructure.Persistence
 {
-    public class DevFreelaDbContext : DbContext
+    public class DevFreelaDbContext : DbContext, IDevFreelaDbContext
     {
         public DevFreelaDbContext(DbContextOptions<DevFreelaDbContext> options) : base(options)
         {
