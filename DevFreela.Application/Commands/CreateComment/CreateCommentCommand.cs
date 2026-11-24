@@ -3,7 +3,7 @@ using MediatR;
 
 namespace DevFreela.Application.Commands.CreateComment
 {
-    public class CreateCommentCommand : IRequest<Unit>
+    public class CreateCommentCommand : IRequest<bool>
     {
         [Required]
         [StringLength(500, MinimumLength = 1)]
