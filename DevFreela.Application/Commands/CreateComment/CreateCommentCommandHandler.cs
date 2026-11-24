@@ -12,7 +12,7 @@ namespace DevFreela.Application.Commands.CreateComment
     {
         private readonly IDevFreelaDbContext _dbContext;
 
-        public CreateCommentCommandHandler(DevFreelaDbContext dbContext)
+        public CreateCommentCommandHandler(IDevFreelaDbContext dbContext)
         {
             _dbContext = dbContext;
         }
