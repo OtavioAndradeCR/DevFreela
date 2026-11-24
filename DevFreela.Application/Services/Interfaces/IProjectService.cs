@@ -1,4 +1,3 @@
-﻿using DevFreela.Application.InputModels;
 using DevFreela.Application.ViewModels;
 
 namespace DevFreela.Application.Services.Interfaces
@@ -7,7 +6,7 @@ namespace DevFreela.Application.Services.Interfaces
     {
         List<ProjectViewModel> GetAll(string query);
         ProjectDetailsViewModel GetById(int id);
-        void Start(int id);
-        void Finish(int id);
+        Task<bool> Start(int id, CancellationToken cancellationToken = default);
+        Task<bool> Finish(int id, CancellationToken cancellationToken = default);
     }
 }
