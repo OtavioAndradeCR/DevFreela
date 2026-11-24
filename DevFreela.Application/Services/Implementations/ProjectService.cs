@@ -51,35 +51,41 @@ namespace DevFreela.Application.Services.Implementations
                 project.Freelancer.FullName);
         }
 
-        public async Task<bool> Start(int id, CancellationToken cancellationToken = default)
+        public async Task<bool?> Start(int id, CancellationToken cancellationToken = default)
         {
             var project = await _dbContext.Projects
                 .SingleOrDefaultAsync(project => project.Id == id, cancellationToken);
 
             if (project == null)
             {
+                return null;
+            }
+
+            if (!project.Start())
+            {
                 return false;
             }
 
-            project.Start();
             await _dbContext.SaveChangesAsync(cancellationToken);
-
             return true;
         }
 
-        public async Task<bool> Finish(int id, CancellationToken cancellationToken = default)
+        public async Task<bool?> Finish(int id, CancellationToken cancellationToken = default)
         {
             var project = await _dbContext.Projects
                 .SingleOrDefaultAsync(project => project.Id == id, cancellationToken);
 
             if (project == null)
             {
+                return null;
+            }
+
+            if (!project.Finish())
+            {
                 return false;
             }
 
-            project.Finish();
             await _dbContext.SaveChangesAsync(cancellationToken);
-
             return true;
         }
     }
