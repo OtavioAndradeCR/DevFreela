@@ -1,3 +1,5 @@
+#nullable enable
+
 namespace DevFreela
 {
     public class WeatherForecast
