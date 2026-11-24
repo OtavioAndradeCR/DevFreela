@@ -7,7 +7,7 @@ namespace DevFreela.Application.Commands.CreateProject
 	public class CreateProjectCommandHandler : IRequestHandler<CreateProjectCommand, int>
 	{
 		private readonly IDevFreelaDbContext _dbContext;
-		public CreateProjectCommandHandler(DevFreelaDbContext dbContext)
+		public CreateProjectCommandHandler(IDevFreelaDbContext dbContext)
 		{
 			_dbContext = dbContext;
 		}
