@@ -9,7 +9,6 @@ O projeto permite cadastrar usuários, consultar projetos e habilidades, acompan
 - C# e .NET 8
 - ASP.NET Core Web API
 - Entity Framework Core 8 e SQL Server
-- Dapper
 - MediatR
 - Swagger / OpenAPI
 
@@ -60,7 +59,6 @@ O cancelamento altera o status do projeto; não remove fisicamente o registro do
 ## Persistência e padrões utilizados
 
 - Entity Framework Core para mapeamento objeto-relacional, consultas e persistência no SQL Server.
-- Dapper permanece como dependência de infraestrutura para consultas SQL que precisem de acesso direto.
 - MediatR organiza operações de aplicação por meio de comandos e consultas.
 - Repositórios abstraem o acesso a projetos, usuários e habilidades.
 - Entidades encapsulam operações do domínio, como iniciar, finalizar, atualizar e cancelar projetos.
