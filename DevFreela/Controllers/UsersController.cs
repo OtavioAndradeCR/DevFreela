@@ -20,7 +20,7 @@ namespace DevFreela.API.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}", Name = "GetUserById")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
             var user = await _mediator.Send(new GetUserById(id));
@@ -31,7 +31,7 @@ namespace DevFreela.API.Controllers
         public async Task<IActionResult> Post([FromBody] CreateUserInputModel inputModel, CancellationToken cancellationToken)
         {
             var id = await _userService.Create(inputModel, cancellationToken);
-            return CreatedAtAction(nameof(GetByIdAsync), new { id }, inputModel);
+            return CreatedAtRoute("GetUserById", new { id }, inputModel);
         }
 
         [HttpPut("{id:int}/login")]
