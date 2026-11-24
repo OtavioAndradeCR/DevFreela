@@ -3,6 +3,7 @@ using MediatR;
 using DevFreela.Application.Commands.CreateProject;
 using DevFreela.Application.Services.Implementations;
 using DevFreela.Application.Services.Interfaces;
+using DevFreela.Application.Persistence;
 using DevFreela.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using DevFreela.Core.Repositories;
@@ -32,6 +33,8 @@ builder.Services.AddSwaggerGen();
 
 var connectionString = builder.Configuration.GetConnectionString("DevFreelaCs");
 builder.Services.AddDbContext<DevFreelaDbContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddScoped<IDevFreelaDbContext>(serviceProvider =>
+    serviceProvider.GetRequiredService<DevFreelaDbContext>());
 //builder.AddDbContext<DevFreelaDbContext>(option => options.UseInMemoryDatabase("DevFreela"));
 
 var app = builder.Build();
