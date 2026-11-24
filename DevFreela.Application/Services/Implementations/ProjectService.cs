@@ -1,83 +1,86 @@
-﻿using Dapper;
-using DevFreela.Application.InputModels;
 using DevFreela.Application.Services.Interfaces;
 using DevFreela.Application.ViewModels;
-using DevFreela.Core.Entities;
 using DevFreela.Infrastructure.Persistence;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 namespace DevFreela.Application.Services.Implementations
 {
-	public class ProjectService : IProjectService
-	{
-		private readonly DevFreelaDbContext _dbContext;
-		private readonly string _connectionString;
-		public ProjectService(DevFreelaDbContext dbContext, IConfiguration configuration)
-		{
-			_dbContext = dbContext;
-			_connectionString = configuration.GetConnectionString("DevFreelaCs");
-		}
+    public class ProjectService : IProjectService
+    {
+        private readonly DevFreelaDbContext _dbContext;
 
-		public void Finish(int id)
-		{
-			var project = _dbContext.Projects.SingleOrDefault(p => p.Id == id);
+        public ProjectService(DevFreelaDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
 
-			project.Finish();
+        public List<ProjectViewModel> GetAll(string query)
+        {
+            var projects = _dbContext.Projects.AsQueryable();
 
-			_dbContext.SaveChanges();
-		}
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                projects = projects.Where(project => project.Title.Contains(query));
+            }
 
-		public List<ProjectViewModel> GetAll(string query)
-		{
-			var projects = _dbContext.Projects;
+            return projects
+                .Select(project => new ProjectViewModel(project.Id, project.Title, project.CreatedAt))
+                .ToList();
+        }
 
-			var ProjectViewModel = projects
-				.Select(p => new ProjectViewModel(p.Id, p.Title, p.CreatedAt))
-				.ToList();
+        public ProjectDetailsViewModel GetById(int id)
+        {
+            var project = _dbContext.Projects
+                .Include(project => project.Client)
+                .Include(project => project.Freelancer)
+                .SingleOrDefault(project => project.Id == id);
 
-			return ProjectViewModel;
-		}
+            if (project == null)
+            {
+                return null;
+            }
 
-		public ProjectDetailsViewModel GetById(int id)
-		{
-			var project = _dbContext.Projects
-				.Include(p => p.Client)
-				.Include(p => p.Freelancer)
-				.SingleOrDefault(p => p.Id == id);
+            return new ProjectDetailsViewModel(
+                project.Id,
+                project.Title,
+                project.Description,
+                project.TotalCost,
+                project.StartedAt,
+                project.FinishedAt,
+                project.Client.FullName,
+                project.Freelancer.FullName);
+        }
 
-			if (project == null) return null;
+        public async Task<bool> Start(int id, CancellationToken cancellationToken = default)
+        {
+            var project = await _dbContext.Projects
+                .SingleOrDefaultAsync(project => project.Id == id, cancellationToken);
 
-			var projectDetailsViewModel = new ProjectDetailsViewModel(
-				project.Id,
-				project.Title,
-				project.Description,
-				project.TotalCost,
-				project.StartedAt,
-				project.FinishedAt,
-				project.Client.FullName,
-				project.Freelancer.FullName
-				);
+            if (project == null)
+            {
+                return false;
+            }
 
-			return projectDetailsViewModel;
-		}
+            project.Start();
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
-		public void Start(int id)
-		{
-			var project = _dbContext.Projects.SingleOrDefault(p => p.Id == id);
+            return true;
+        }
 
-			project.Start();
-			//_dbContext.SaveChanges();
-			
-			using (var sqlConnection = new SqlConnection(_connectionString))
-			{
-				sqlConnection.Open();
-				
-				var script = "UPDATE Projects SET Status = @status, StartedAt = @startedAt WHERE Id = @id";
-				
-				sqlConnection.Execute(script, new { status = project.Status, startedAt = project.StartedAt, id });
-			}
-		}
-	}
+        public async Task<bool> Finish(int id, CancellationToken cancellationToken = default)
+        {
+            var project = await _dbContext.Projects
+                .SingleOrDefaultAsync(project => project.Id == id, cancellationToken);
+
+            if (project == null)
+            {
+                return false;
+            }
+
+            project.Finish();
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            return true;
+        }
+    }
 }
