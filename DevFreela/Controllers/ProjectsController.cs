@@ -30,7 +30,7 @@ namespace DevFreela.API.Controllers
             return Ok(projects);
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}", Name = "GetProjectById")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
             var project = await _mediator.Send(new GetProjectByIdQuery(id));
@@ -41,7 +41,7 @@ namespace DevFreela.API.Controllers
         public async Task<IActionResult> Post([FromBody] CreateProjectCommand command)
         {
             var id = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetByIdAsync), new { id }, command);
+            return CreatedAtRoute("GetProjectById", new { id }, command);
         }
 
         [HttpPut("{id:int}")]
