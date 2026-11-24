@@ -92,7 +92,7 @@ Em ambiente de desenvolvimento, a documentação Swagger é disponibilizada pela
 
 ## Testes automatizados
 
-O projeto `DevFreela.Tests` utiliza xUnit e, neste primeiro conjunto, cobre as regras de transição de estado da entidade `Project`: criação, início, finalização e cancelamento, incluindo transições inválidas.
+O projeto `DevFreela.Tests` utiliza xUnit e Entity Framework Core InMemory. A suíte cobre as regras de transição de estado da entidade `Project` e os handlers de criação, atualização, cancelamento e comentários, incluindo cenários de sucesso e registros inexistentes.
 
 Para executar todos os testes da solução, utilize na raiz do repositório:
 
