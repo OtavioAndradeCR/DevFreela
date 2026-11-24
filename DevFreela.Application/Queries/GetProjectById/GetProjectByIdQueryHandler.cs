@@ -23,8 +23,8 @@ namespace DevFreela.Application.Queries.GetProjectById
 
             var projectDetailsVM = new ProjectDetailsViewModel(
                 project.Id,
-                project.Description,
                 project.Title,
+                project.Description,
                 project.TotalCost,
                 project.StartedAt,
                 project.FinishedAt,
