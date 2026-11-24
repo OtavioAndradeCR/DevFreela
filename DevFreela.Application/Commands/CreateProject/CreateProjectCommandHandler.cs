@@ -16,8 +16,8 @@ namespace DevFreela.Application.Commands.CreateProject
 		{
 			var project = new Project(request.Title, request.Description, request.IdClient, request.IdFreelancer, request.TotalCost);
 
-			await _dbContext.Projects.AddAsync(project);
-			await _dbContext.SaveChangesAsync();
+			await _dbContext.Projects.AddAsync(project, cancellationToken);
+			await _dbContext.SaveChangesAsync(cancellationToken);
 
 			return project.Id;
 		}
