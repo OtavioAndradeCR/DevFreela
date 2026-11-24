@@ -1,3 +1,4 @@
+using Xunit;
 using DevFreela.Core.Entities;
 using DevFreela.Core.Enums;
 
