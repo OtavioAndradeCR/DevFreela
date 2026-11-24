@@ -40,7 +40,7 @@ A camada Application depende de abstrações de persistência definidas em seu p
 | PUT | `/api/projects/{id}/cancel` | Cancela um projeto |
 | POST | `/api/projects/{id}/comments` | Adiciona um comentário ao projeto |
 
-O cancelamento altera o status do projeto; não remove fisicamente o registro do banco de dados.
+O cancelamento altera o status do projeto; não remove fisicamente o registro do banco de dados. Operações incompatíveis com o estado atual retornam HTTP 409 (Conflict), enquanto identificadores inexistentes retornam HTTP 404 (Not Found).
 
 ### Usuários
 
