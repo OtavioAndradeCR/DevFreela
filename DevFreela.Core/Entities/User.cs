@@ -8,9 +8,9 @@ namespace DevFreela.Core.Entities
     {
         public User(string fullName, string email, DateTime birthDate)
         {
-            FullName = FullName;
-            Email = Email;
-            BirthDate = BirthDate;
+            FullName = fullName;
+            Email = email;
+            BirthDate = birthDate;
             Active = true;
 
             CreatedAt = DateTime.Now;
