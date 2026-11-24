@@ -19,12 +19,12 @@ namespace DevFreela.Application.Services.Implementations
             _dbContext = dbContext;
         }
 
-        public int Create(CreateUserInputModel inputModel)
+        public async Task<int> Create(CreateUserInputModel inputModel, CancellationToken cancellationToken = default)
         {
             var user = new User(inputModel.FullName, inputModel.Email, inputModel.BirthDate);
 
-            _dbContext.Users.Add(user);
-            _dbContext.SaveChanges();
+            await _dbContext.Users.AddAsync(user, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             return user.Id;
         }
