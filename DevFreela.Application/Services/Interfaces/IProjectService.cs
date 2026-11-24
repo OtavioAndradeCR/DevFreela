@@ -6,7 +6,7 @@ namespace DevFreela.Application.Services.Interfaces
     {
         List<ProjectViewModel> GetAll(string query);
         ProjectDetailsViewModel GetById(int id);
-        Task<bool> Start(int id, CancellationToken cancellationToken = default);
-        Task<bool> Finish(int id, CancellationToken cancellationToken = default);
+        Task<bool?> Start(int id, CancellationToken cancellationToken = default);
+        Task<bool?> Finish(int id, CancellationToken cancellationToken = default);
     }
 }
