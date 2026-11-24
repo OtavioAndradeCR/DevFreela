@@ -8,7 +8,7 @@ namespace DevFreela.Application.Commands.UpdateProject
     {
         private readonly IDevFreelaDbContext _dbContext;
 
-        public UpdateProjectCommandhandler(DevFreelaDbContext dbContext)
+        public UpdateProjectCommandhandler(IDevFreelaDbContext dbContext)
         {
             _dbContext = dbContext;
         }
