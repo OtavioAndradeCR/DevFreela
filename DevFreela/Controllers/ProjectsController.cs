@@ -52,8 +52,8 @@ namespace DevFreela.API.Controllers
             return updated ? NoContent() : NotFound();
         }
 
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpPut("{id:int}/cancel")]
+        public async Task<IActionResult> Cancel(int id)
         {
             var cancelled = await _mediator.Send(new DeleteProjectCommand(id));
             return cancelled ? NoContent() : NotFound();
