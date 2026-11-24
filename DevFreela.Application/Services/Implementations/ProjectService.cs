@@ -1,13 +1,13 @@
 using DevFreela.Application.Services.Interfaces;
 using DevFreela.Application.ViewModels;
-using DevFreela.Infrastructure.Persistence;
+using DevFreela.Application.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevFreela.Application.Services.Implementations
 {
     public class ProjectService : IProjectService
     {
-        private readonly DevFreelaDbContext _dbContext;
+        private readonly IDevFreelaDbContext _dbContext;
 
         public ProjectService(DevFreelaDbContext dbContext)
         {
