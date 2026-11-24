@@ -55,8 +55,13 @@ namespace DevFreela.API.Controllers
         [HttpPut("{id:int}/cancel")]
         public async Task<IActionResult> Cancel(int id)
         {
-            var cancelled = await _mediator.Send(new DeleteProjectCommand(id));
-            return cancelled ? NoContent() : NotFound();
+            var result = await _mediator.Send(new DeleteProjectCommand(id));
+
+            return result is null
+                ? NotFound()
+                : result.Value
+                    ? NoContent()
+                    : Conflict("O projeto não pode ser cancelado no estado atual.");
         }
 
         [HttpPost("{id:int}/comments")]
@@ -70,15 +75,25 @@ namespace DevFreela.API.Controllers
         [HttpPut("{id:int}/start")]
         public async Task<IActionResult> Start(int id, CancellationToken cancellationToken)
         {
-            var started = await _projectService.Start(id, cancellationToken);
-            return started ? NoContent() : NotFound();
+            var result = await _projectService.Start(id, cancellationToken);
+
+            return result is null
+                ? NotFound()
+                : result.Value
+                    ? NoContent()
+                    : Conflict("O projeto não pode ser iniciado no estado atual.");
         }
 
         [HttpPut("{id:int}/finish")]
         public async Task<IActionResult> Finish(int id, CancellationToken cancellationToken)
         {
-            var finished = await _projectService.Finish(id, cancellationToken);
-            return finished ? NoContent() : NotFound();
+            var result = await _projectService.Finish(id, cancellationToken);
+
+            return result is null
+                ? NotFound()
+                : result.Value
+                    ? NoContent()
+                    : Conflict("O projeto não pode ser finalizado no estado atual.");
         }
     }
 }
