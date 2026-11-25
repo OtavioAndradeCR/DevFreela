@@ -219,6 +219,18 @@ public sealed class ApiIntegrationTests : IDisposable
     }
 
     [Fact]
+    public async Task FinishProject_WhenProjectIsNotInProgress_ShouldReturnConflict()
+    {
+        var clientId = await CreateUserAsync("Cliente");
+        var freelancerId = await CreateUserAsync("Freelancer");
+        var projectId = await CreateProjectAsync(clientId, freelancerId);
+
+        var response = await _client.PutAsync($"/api/projects/{projectId}/finish", null);
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
+    [Fact]
     public async Task AddComment_WhenProjectAndUserExist_ShouldReturnNoContent()
     {
         var clientId = await CreateUserAsync("Cliente");
