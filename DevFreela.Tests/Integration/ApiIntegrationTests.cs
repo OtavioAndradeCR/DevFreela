@@ -172,6 +172,38 @@ public sealed class ApiIntegrationTests : IDisposable
     }
 
     [Fact]
+    public async Task CreateProject_WhenInputIsValid_ShouldReturnCreatedWithLocationAndProjectData()
+    {
+        var clientId = await CreateUserAsync("Cliente");
+        var freelancerId = await CreateUserAsync("Freelancer");
+
+        var response = await _client.PostAsJsonAsync("/api/projects", new
+        {
+            Title = "Projeto criado pela API",
+            Description = "Validando o contrato de criação do projeto.",
+            IdClient = clientId,
+            IdFreelancer = freelancerId,
+            TotalCost = 3200m
+        });
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        Assert.NotNull(response.Headers.Location);
+
+        var createdProject = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal("Projeto criado pela API", createdProject.GetProperty("title").GetString());
+        Assert.Equal("Validando o contrato de criação do projeto.", createdProject.GetProperty("description").GetString());
+        Assert.Equal(clientId, createdProject.GetProperty("idClient").GetInt32());
+        Assert.Equal(freelancerId, createdProject.GetProperty("idFreelancer").GetInt32());
+        Assert.Equal(3200m, createdProject.GetProperty("totalCost").GetDecimal());
+
+        var getResponse = await _client.GetAsync(response.Headers.Location);
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+
+        var project = await getResponse.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal("Projeto criado pela API", project.GetProperty("title").GetString());
+    }
+
+    [Fact]
     public async Task GetProject_WhenProjectDoesNotExist_ShouldReturnNotFound()
     {
         var response = await _client.GetAsync("/api/projects/999");
