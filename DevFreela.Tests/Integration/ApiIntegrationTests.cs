@@ -107,6 +107,21 @@ public sealed class ApiIntegrationTests : IDisposable
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    [Theory]
+    [InlineData("")]
+    [InlineData("AB")]
+    public async Task CreateUser_WhenFullNameIsInvalid_ShouldReturnBadRequest(string fullName)
+    {
+        var response = await _client.PostAsJsonAsync("/api/users", new
+        {
+            FullName = fullName,
+            Email = "usuario.valido@example.com",
+            BirthDate = new DateTime(1995, 5, 20)
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     [Fact]
     public async Task GetProject_WhenProjectDoesNotExist_ShouldReturnNotFound()
     {
