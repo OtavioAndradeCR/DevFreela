@@ -119,6 +119,29 @@ public class ProjectCommandHandlerTests
     }
 
     [Fact]
+    public async Task DeleteProject_WhenProjectIsInProgress_ShouldCancelAndKeepRecord()
+    {
+        // Arrange
+        await using var context = CreateContext();
+        var project = new Project("Projeto em andamento", "Descrição", 1, 2, 100m);
+        project.Start();
+        context.Projects.Add(project);
+        await context.SaveChangesAsync();
+
+        var handler = new DeleteProjectCommandHandler(context);
+
+        // Act
+        var result = await handler.Handle(new DeleteProjectCommand(project.Id), CancellationToken.None);
+
+        // Assert
+        var persistedProject = await context.Projects.SingleAsync();
+        Assert.True(result);
+        Assert.Equal(ProjectStatusEnum.Cancelled, persistedProject.Status);
+        Assert.Equal(project.Id, persistedProject.Id);
+        Assert.Equal(1, await context.Projects.CountAsync());
+    }
+
+    [Fact]
     public async Task DeleteProject_WhenProjectDoesNotExist_ShouldReturnNull()
     {
         // Arrange
