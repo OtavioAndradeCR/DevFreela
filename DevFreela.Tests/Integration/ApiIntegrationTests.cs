@@ -396,7 +396,7 @@ public sealed class ApiIntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task UpdateProject_WhenProjectExists_ShouldReturnNoContentAndPersistChanges()
+    public async Task UpdateProject_WhenProjectExists_ShouldPersistChangesWithoutChangingParticipantsOrStatus()
     {
         var clientId = await CreateUserAsync("Cliente");
         var freelancerId = await CreateUserAsync("Freelancer");
@@ -414,10 +414,20 @@ public sealed class ApiIntegrationTests : IDisposable
         var getResponse = await _client.GetAsync($"/api/projects/{projectId}");
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
 
-        var project = await getResponse.Content.ReadFromJsonAsync<JsonElement>();
-        Assert.Equal("Projeto atualizado", project.GetProperty("title").GetString());
-        Assert.Equal("Descrição atualizada pelo teste de integração.", project.GetProperty("description").GetString());
-        Assert.Equal(2500m, project.GetProperty("totalCost").GetDecimal());
+        var projectResponse = await getResponse.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal("Projeto atualizado", projectResponse.GetProperty("title").GetString());
+        Assert.Equal("Descrição atualizada pelo teste de integração.", projectResponse.GetProperty("description").GetString());
+        Assert.Equal(2500m, projectResponse.GetProperty("totalCost").GetDecimal());
+
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<DevFreelaDbContext>();
+        var project = Assert.Single(context.Projects);
+
+        Assert.Equal(clientId, project.IdClient);
+        Assert.Equal(freelancerId, project.IdFreelancer);
+        Assert.Equal(ProjectStatusEnum.Created, project.Status);
+        Assert.Null(project.StartedAt);
+        Assert.Null(project.FinishedAt);
     }
 
     [Fact]
