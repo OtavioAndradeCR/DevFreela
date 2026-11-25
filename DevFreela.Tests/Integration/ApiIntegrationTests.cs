@@ -122,6 +122,30 @@ public sealed class ApiIntegrationTests : IDisposable
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    [Theory]
+    [InlineData("", "Descrição válida para o projeto.", 1500)]
+    [InlineData("Projeto válido", "AB", 1500)]
+    [InlineData("Projeto válido", "Descrição válida para o projeto.", 0)]
+    public async Task CreateProject_WhenInputIsInvalid_ShouldReturnBadRequest(
+        string title,
+        string description,
+        decimal totalCost)
+    {
+        var clientId = await CreateUserAsync("Cliente");
+        var freelancerId = await CreateUserAsync("Freelancer");
+
+        var response = await _client.PostAsJsonAsync("/api/projects", new
+        {
+            Title = title,
+            Description = description,
+            IdClient = clientId,
+            IdFreelancer = freelancerId,
+            TotalCost = totalCost
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     [Fact]
     public async Task GetProject_WhenProjectDoesNotExist_ShouldReturnNotFound()
     {
