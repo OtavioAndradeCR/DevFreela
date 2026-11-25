@@ -167,6 +167,46 @@ public sealed class ApiIntegrationTests : IDisposable
     }
 
     [Fact]
+    public async Task AddComment_WhenProjectDoesNotExist_ShouldReturnNotFound()
+    {
+        var userId = await CreateUserAsync("Cliente");
+
+        var response = await _client.PostAsJsonAsync("/api/projects/999/comments", new
+        {
+            Content = "Comentário para projeto inexistente.",
+            IdUser = userId
+        });
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AddComment_WhenUserDoesNotExist_ShouldReturnNotFound()
+    {
+        var clientId = await CreateUserAsync("Cliente");
+        var freelancerId = await CreateUserAsync("Freelancer");
+        var projectId = await CreateProjectAsync(clientId, freelancerId);
+
+        var response = await _client.PostAsJsonAsync($"/api/projects/{projectId}/comments", new
+        {
+            Content = "Comentário de usuário inexistente.",
+            IdUser = 999
+        });
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Theory]
+    [InlineData("start")]
+    [InlineData("finish")]
+    public async Task ProjectLifecycle_WhenProjectDoesNotExist_ShouldReturnNotFound(string action)
+    {
+        var response = await _client.PutAsync($"/api/projects/999/{action}", null);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
     public async Task GetSkills_WhenNoSkillsExist_ShouldReturnOkAndEmptyList()
     {
         var response = await _client.GetAsync("/api/skills");
