@@ -1,6 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using DevFreela.Core.Entities;
+using DevFreela.Infrastructure.Persistence;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace DevFreela.Tests.Integration;
@@ -281,6 +284,30 @@ public sealed class ApiIntegrationTests : IDisposable
         var skills = await response.Content.ReadFromJsonAsync<List<JsonElement>>();
         Assert.NotNull(skills);
         Assert.Empty(skills);
+    }
+
+    [Fact]
+    public async Task GetSkills_WhenSkillsExist_ShouldReturnSkillDetails()
+    {
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<DevFreelaDbContext>();
+            context.Skills.AddRange(
+                new Skill("C#"),
+                new Skill("ASP.NET Core"));
+
+            await context.SaveChangesAsync();
+        }
+
+        var response = await _client.GetAsync("/api/skills");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var skills = await response.Content.ReadFromJsonAsync<List<JsonElement>>();
+        Assert.NotNull(skills);
+        Assert.Equal(2, skills.Count);
+        Assert.Contains(skills, skill => skill.GetProperty("description").GetString() == "C#");
+        Assert.Contains(skills, skill => skill.GetProperty("description").GetString() == "ASP.NET Core");
     }
 
     [Fact]
