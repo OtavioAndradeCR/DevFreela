@@ -16,6 +16,8 @@ public class ProjectCommentTests
         Assert.Equal("Comentário de teste", comment.Content);
         Assert.Equal(10, comment.IdProject);
         Assert.Equal(20, comment.IdUser);
+        Assert.Null(comment.Project);
+        Assert.Null(comment.User);
         Assert.NotEqual(default, comment.CreatedAt);
     }
 }
