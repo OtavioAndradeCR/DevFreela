@@ -78,6 +78,40 @@ public class ProjectCommandHandlerTests
     }
 
     [Fact]
+    public async Task UpdateProject_WhenProjectIsInProgress_ShouldPreserveLifecycleState()
+    {
+        // Arrange
+        await using var context = CreateContext();
+        var project = new Project("Título antigo", "Descrição antiga", 1, 2, 100m);
+        project.Start();
+        var startedAt = project.StartedAt;
+        context.Projects.Add(project);
+        await context.SaveChangesAsync();
+
+        var handler = new UpdateProjectCommandhandler(context);
+        var command = new UpdateProjectCommand
+        {
+            Id = project.Id,
+            Title = "Título atualizado",
+            Description = "Descrição atualizada",
+            TotalCost = 350m
+        };
+
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        var updatedProject = await context.Projects.SingleAsync();
+        Assert.True(result);
+        Assert.Equal(ProjectStatusEnum.InProgress, updatedProject.Status);
+        Assert.Equal(startedAt, updatedProject.StartedAt);
+        Assert.Null(updatedProject.FinishedAt);
+        Assert.Equal("Título atualizado", updatedProject.Title);
+        Assert.Equal("Descrição atualizada", updatedProject.Description);
+        Assert.Equal(350m, updatedProject.TotalCost);
+    }
+
+    [Fact]
     public async Task UpdateProject_WhenProjectDoesNotExist_ShouldReturnFalse()
     {
         // Arrange
