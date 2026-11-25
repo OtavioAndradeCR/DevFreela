@@ -439,6 +439,40 @@ public sealed class ApiIntegrationTests : IDisposable
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
+    [Theory]
+    [InlineData("")]
+    [InlineData("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")]
+    public async Task AddComment_WhenContentIsInvalid_ShouldReturnBadRequest(string content)
+    {
+        var clientId = await CreateUserAsync("Cliente");
+        var freelancerId = await CreateUserAsync("Freelancer");
+        var projectId = await CreateProjectAsync(clientId, freelancerId);
+
+        var response = await _client.PostAsJsonAsync($"/api/projects/{projectId}/comments", new
+        {
+            Content = content,
+            IdUser = clientId
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AddComment_WhenUserIdIsInvalid_ShouldReturnBadRequest()
+    {
+        var clientId = await CreateUserAsync("Cliente");
+        var freelancerId = await CreateUserAsync("Freelancer");
+        var projectId = await CreateProjectAsync(clientId, freelancerId);
+
+        var response = await _client.PostAsJsonAsync($"/api/projects/{projectId}/comments", new
+        {
+            Content = "Comentário válido.",
+            IdUser = 0
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     private async Task<int> CreateUserAsync(string role)
     {
         var response = await _client.PostAsJsonAsync("/api/users", new
