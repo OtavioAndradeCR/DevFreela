@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using DevFreela.Core.Entities;
+using DevFreela.Core.Enums;
 using DevFreela.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -478,7 +479,7 @@ public sealed class ApiIntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task CancelProject_WhenProjectCanBeCancelled_ShouldReturnNoContent()
+    public async Task CancelProject_WhenProjectCanBeCancelled_ShouldReturnNoContentAndPersistCancelledStatus()
     {
         var clientId = await CreateUserAsync("Cliente");
         var freelancerId = await CreateUserAsync("Freelancer");
@@ -487,6 +488,12 @@ public sealed class ApiIntegrationTests : IDisposable
         var response = await _client.PutAsync($"/api/projects/{projectId}/cancel", null);
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<DevFreelaDbContext>();
+        var project = Assert.Single(context.Projects);
+
+        Assert.Equal(ProjectStatusEnum.Cancelled, project.Status);
     }
 
     [Fact]
