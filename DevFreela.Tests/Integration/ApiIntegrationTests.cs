@@ -347,6 +347,36 @@ public sealed class ApiIntegrationTests : IDisposable
         Assert.Equal(2500m, project.GetProperty("totalCost").GetDecimal());
     }
 
+    [Fact]
+    public async Task UpdateProject_WhenBodyContainsDifferentId_ShouldUpdateOnlyRouteProject()
+    {
+        var clientId = await CreateUserAsync("Cliente");
+        var freelancerId = await CreateUserAsync("Freelancer");
+        var routeProjectId = await CreateProjectAsync(clientId, freelancerId, "Projeto da rota");
+        var bodyProjectId = await CreateProjectAsync(clientId, freelancerId, "Projeto do corpo");
+
+        var response = await _client.PutAsJsonAsync($"/api/projects/{routeProjectId}", new
+        {
+            Id = bodyProjectId,
+            Title = "Projeto atualizado pela rota",
+            Description = "A rota deve definir qual projeto será atualizado.",
+            TotalCost = 2500m
+        });
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+        var routeProjectResponse = await _client.GetAsync($"/api/projects/{routeProjectId}");
+        var routeProject = await routeProjectResponse.Content.ReadFromJsonAsync<JsonElement>();
+
+        var bodyProjectResponse = await _client.GetAsync($"/api/projects/{bodyProjectId}");
+        var bodyProject = await bodyProjectResponse.Content.ReadFromJsonAsync<JsonElement>();
+
+        Assert.Equal("Projeto atualizado pela rota", routeProject.GetProperty("title").GetString());
+        Assert.Equal(2500m, routeProject.GetProperty("totalCost").GetDecimal());
+        Assert.Equal("Projeto do corpo", bodyProject.GetProperty("title").GetString());
+        Assert.Equal(1500m, bodyProject.GetProperty("totalCost").GetDecimal());
+    }
+
     [Theory]
     [InlineData("", "Descrição válida para atualização.", 2500)]
     [InlineData("AB", "Descrição válida para atualização.", 2500)]
