@@ -52,4 +52,43 @@ public class ProjectRepositoryTests
         var persistedProject = await context.Projects.SingleAsync();
         Assert.Equal(ProjectStatusEnum.Cancelled, persistedProject.Status);
     }
+
+    [Fact]
+    public async Task GetProjectByIdAsync_WhenProjectExists_ShouldReturnProjectWithClientAndFreelancer()
+    {
+        await using var context = CreateContext();
+        var client = new User("Cliente de teste", "cliente@example.com", new DateTime(1990, 1, 1));
+        var freelancer = new User("Freelancer de teste", "freelancer@example.com", new DateTime(1992, 1, 1));
+
+        context.Users.AddRange(client, freelancer);
+        await context.SaveChangesAsync();
+
+        var project = new Project("Projeto de teste", "Descrição do projeto", client.Id, freelancer.Id, 1500m);
+        context.Projects.Add(project);
+        await context.SaveChangesAsync();
+
+        var repository = new ProjectRepository(context);
+
+        var result = await repository.GetProjectByIdAsync(project.Id);
+
+        Assert.NotNull(result);
+        Assert.Equal(project.Id, result.Id);
+        Assert.Equal("Projeto de teste", result.Title);
+        Assert.NotNull(result.Client);
+        Assert.Equal("Cliente de teste", result.Client.FullName);
+        Assert.NotNull(result.Freelancer);
+        Assert.Equal("Freelancer de teste", result.Freelancer.FullName);
+    }
+
+    [Fact]
+    public async Task GetProjectByIdAsync_WhenProjectDoesNotExist_ShouldReturnNull()
+    {
+        await using var context = CreateContext();
+        var repository = new ProjectRepository(context);
+
+        var result = await repository.GetProjectByIdAsync(999);
+
+        Assert.Null(result);
+    }
+
 }
