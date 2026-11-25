@@ -29,6 +29,42 @@ public sealed class ApiIntegrationTests : IDisposable
     }
 
     [Fact]
+    public async Task GetProjects_WhenQueryMatches_ShouldReturnOnlyMatchingProjects()
+    {
+        var clientId = await CreateUserAsync("Cliente");
+        var freelancerId = await CreateUserAsync("Freelancer");
+
+        await CreateProjectAsync(clientId, freelancerId, "Sistema financeiro");
+        await CreateProjectAsync(clientId, freelancerId, "Portal institucional");
+
+        var response = await _client.GetAsync("/api/projects?query=financeiro");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var projects = await response.Content.ReadFromJsonAsync<List<JsonElement>>();
+        Assert.NotNull(projects);
+        var project = Assert.Single(projects);
+        Assert.Equal("Sistema financeiro", project.GetProperty("title").GetString());
+    }
+
+    [Fact]
+    public async Task GetProjects_WhenQueryDoesNotMatch_ShouldReturnEmptyList()
+    {
+        var clientId = await CreateUserAsync("Cliente");
+        var freelancerId = await CreateUserAsync("Freelancer");
+
+        await CreateProjectAsync(clientId, freelancerId, "Sistema financeiro");
+
+        var response = await _client.GetAsync("/api/projects?query=inexistente");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var projects = await response.Content.ReadFromJsonAsync<List<JsonElement>>();
+        Assert.NotNull(projects);
+        Assert.Empty(projects);
+    }
+
+    [Fact]
     public async Task GetUser_WhenUserDoesNotExist_ShouldReturnNotFound()
     {
         var response = await _client.GetAsync("/api/users/999");
@@ -216,11 +252,11 @@ public sealed class ApiIntegrationTests : IDisposable
         return GetIdFromLocation(response);
     }
 
-    private async Task<int> CreateProjectAsync(int clientId, int freelancerId)
+    private async Task<int> CreateProjectAsync(int clientId, int freelancerId, string title = "Projeto de integração")
     {
         var response = await _client.PostAsJsonAsync("/api/projects", new
         {
-            Title = "Projeto de integração",
+            Title = title,
             Description = "Projeto criado durante o teste de integração.",
             IdClient = clientId,
             IdFreelancer = freelancerId,
