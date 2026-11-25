@@ -33,13 +33,14 @@ public sealed class ApiIntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task GetProjects_WhenQueryMatches_ShouldReturnOnlyMatchingProjects()
+    public async Task GetProjects_WhenQueryMatches_ShouldReturnAllMatchingProjectsAndExcludeOthers()
     {
         var clientId = await CreateUserAsync("Cliente");
         var freelancerId = await CreateUserAsync("Freelancer");
 
         await CreateProjectAsync(clientId, freelancerId, "Sistema financeiro");
         await CreateProjectAsync(clientId, freelancerId, "Portal institucional");
+        await CreateProjectAsync(clientId, freelancerId, "Sistema financeiro mobile");
 
         var response = await _client.GetAsync("/api/projects?query=financeiro");
 
@@ -47,8 +48,10 @@ public sealed class ApiIntegrationTests : IDisposable
 
         var projects = await response.Content.ReadFromJsonAsync<List<JsonElement>>();
         Assert.NotNull(projects);
-        var project = Assert.Single(projects);
-        Assert.Equal("Sistema financeiro", project.GetProperty("title").GetString());
+        Assert.Equal(2, projects.Count);
+        Assert.Contains(projects, project => project.GetProperty("title").GetString() == "Sistema financeiro");
+        Assert.Contains(projects, project => project.GetProperty("title").GetString() == "Sistema financeiro mobile");
+        Assert.DoesNotContain(projects, project => project.GetProperty("title").GetString() == "Portal institucional");
     }
 
     [Fact]
