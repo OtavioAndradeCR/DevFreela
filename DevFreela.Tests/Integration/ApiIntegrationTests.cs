@@ -335,6 +335,30 @@ public sealed class ApiIntegrationTests : IDisposable
         Assert.Equal(2500m, project.GetProperty("totalCost").GetDecimal());
     }
 
+    [Theory]
+    [InlineData("", "Descrição válida para atualização.", 2500)]
+    [InlineData("AB", "Descrição válida para atualização.", 2500)]
+    [InlineData("Projeto válido", "AB", 2500)]
+    [InlineData("Projeto válido", "Descrição válida para atualização.", 0)]
+    public async Task UpdateProject_WhenInputIsInvalid_ShouldReturnBadRequest(
+        string title,
+        string description,
+        decimal totalCost)
+    {
+        var clientId = await CreateUserAsync("Cliente");
+        var freelancerId = await CreateUserAsync("Freelancer");
+        var projectId = await CreateProjectAsync(clientId, freelancerId);
+
+        var response = await _client.PutAsJsonAsync($"/api/projects/{projectId}", new
+        {
+            Title = title,
+            Description = description,
+            TotalCost = totalCost
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     [Fact]
     public async Task UpdateProject_WhenProjectDoesNotExist_ShouldReturnNotFound()
     {
