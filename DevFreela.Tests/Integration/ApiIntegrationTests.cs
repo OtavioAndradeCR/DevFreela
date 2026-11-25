@@ -236,7 +236,7 @@ public sealed class ApiIntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ProjectLifecycle_WhenCreated_ShouldAllowStartAndFinish()
+    public async Task ProjectLifecycle_WhenCreated_ShouldAllowStartAndFinishAndPersistTimestamps()
     {
         var clientId = await CreateUserAsync("Cliente");
         var freelancerId = await CreateUserAsync("Freelancer");
@@ -253,6 +253,15 @@ public sealed class ApiIntegrationTests : IDisposable
 
         var invalidStartResponse = await _client.PutAsync($"/api/projects/{projectId}/start", null);
         Assert.Equal(HttpStatusCode.Conflict, invalidStartResponse.StatusCode);
+
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<DevFreelaDbContext>();
+        var project = Assert.Single(context.Projects);
+
+        Assert.Equal(ProjectStatusEnum.Finished, project.Status);
+        Assert.NotNull(project.StartedAt);
+        Assert.NotNull(project.FinishedAt);
+        Assert.True(project.FinishedAt >= project.StartedAt);
     }
 
     [Fact]
