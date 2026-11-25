@@ -130,6 +130,29 @@ public sealed class ApiIntegrationTests : IDisposable
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
+
+    [Fact]
+    public async Task GetProject_WhenProjectExists_ShouldReturnProjectDetails()
+    {
+        var clientId = await CreateUserAsync("Cliente");
+        var freelancerId = await CreateUserAsync("Freelancer");
+        var projectId = await CreateProjectAsync(clientId, freelancerId, "Projeto para consulta");
+
+        var response = await _client.GetAsync($"/api/projects/{projectId}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var project = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal(projectId, project.GetProperty("id").GetInt32());
+        Assert.Equal("Projeto para consulta", project.GetProperty("title").GetString());
+        Assert.Equal("Projeto criado durante o teste de integração.", project.GetProperty("description").GetString());
+        Assert.Equal(1500m, project.GetProperty("totalCost").GetDecimal());
+        Assert.Equal("Usuário Cliente", project.GetProperty("clientFullName").GetString());
+        Assert.Equal("Usuário Freelancer", project.GetProperty("freelancerFullName").GetString());
+        Assert.Equal(JsonValueKind.Null, project.GetProperty("startedAt").ValueKind);
+        Assert.Equal(JsonValueKind.Null, project.GetProperty("finishedAt").ValueKind);
+    }
+
     [Fact]
     public async Task ProjectLifecycle_WhenCreated_ShouldAllowStartAndFinish()
     {
