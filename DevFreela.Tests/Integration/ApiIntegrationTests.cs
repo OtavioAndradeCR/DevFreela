@@ -397,6 +397,23 @@ public sealed class ApiIntegrationTests : IDisposable
     }
 
     [Fact]
+    public async Task CancelProject_WhenProjectIsInProgress_ShouldReturnNoContentAndPreventRestart()
+    {
+        var clientId = await CreateUserAsync("Cliente");
+        var freelancerId = await CreateUserAsync("Freelancer");
+        var projectId = await CreateProjectAsync(clientId, freelancerId);
+
+        var startResponse = await _client.PutAsync($"/api/projects/{projectId}/start", null);
+        Assert.Equal(HttpStatusCode.NoContent, startResponse.StatusCode);
+
+        var cancelResponse = await _client.PutAsync($"/api/projects/{projectId}/cancel", null);
+        Assert.Equal(HttpStatusCode.NoContent, cancelResponse.StatusCode);
+
+        var restartResponse = await _client.PutAsync($"/api/projects/{projectId}/start", null);
+        Assert.Equal(HttpStatusCode.Conflict, restartResponse.StatusCode);
+    }
+
+    [Fact]
     public async Task CancelProject_WhenProjectIsFinished_ShouldReturnConflict()
     {
         var clientId = await CreateUserAsync("Cliente");
