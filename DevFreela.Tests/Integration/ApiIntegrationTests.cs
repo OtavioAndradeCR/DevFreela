@@ -253,19 +253,28 @@ public sealed class ApiIntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task AddComment_WhenProjectAndUserExist_ShouldReturnNoContent()
+    public async Task AddComment_WhenProjectAndUserExist_ShouldReturnNoContentAndPersistComment()
     {
         var clientId = await CreateUserAsync("Cliente");
         var freelancerId = await CreateUserAsync("Freelancer");
         var projectId = await CreateProjectAsync(clientId, freelancerId);
+        const string commentContent = "Comentário criado no teste de integração.";
 
         var response = await _client.PostAsJsonAsync($"/api/projects/{projectId}/comments", new
         {
-            Content = "Comentário criado no teste de integração.",
+            Content = commentContent,
             IdUser = clientId
         });
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<DevFreelaDbContext>();
+        var comment = Assert.Single(context.ProjectComments);
+
+        Assert.Equal(commentContent, comment.Content);
+        Assert.Equal(projectId, comment.IdProject);
+        Assert.Equal(clientId, comment.IdUser);
     }
 
     [Fact]
