@@ -1,5 +1,7 @@
 # DevFreela — API de Gestão de Projetos Freelance
 
+[![.NET CI](https://github.com/OtavioAndradeCR/DevFreela/actions/workflows/dotnet.yml/badge.svg)](https://github.com/OtavioAndradeCR/DevFreela/actions/workflows/dotnet.yml)
+
 API REST para gerenciamento de projetos entre clientes e freelancers, desenvolvida com C# e ASP.NET Core no .NET 8.
 
 O projeto permite cadastrar usuários, consultar projetos e habilidades, acompanhar o ciclo de vida dos projetos e registrar comentários.
@@ -71,11 +73,18 @@ O cancelamento altera o status do projeto; não remove fisicamente o registro do
 
 - .NET SDK 8
 - SQL Server (local ou remoto)
-- Banco de dados `DevFreela` criado e acessível
+- SQL Server local ou remoto acessível
 
 ### Configuração
 
 Ajuste a connection string `DevFreelaCs` em `DevFreela/appsettings.json` para apontar para sua instância do SQL Server.
+
+A solução contém uma migration inicial. Instale a ferramenta `dotnet-ef` na mesma versão principal do Entity Framework Core e aplique as migrations para criar/atualizar o banco:
+
+```bash
+dotnet tool install --global dotnet-ef --version 8.0.2
+dotnet ef database update --project DevFreela.Infrastructure/DevFreela.Infrastructure.csproj --startup-project DevFreela/DevFreela.API.csproj
+```
 
 Não utilize credenciais reais em arquivos versionados. Para ambientes compartilhados, prefira configurar a connection string por variáveis de ambiente ou Secret Manager.
 
