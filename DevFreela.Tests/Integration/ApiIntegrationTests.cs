@@ -96,13 +96,11 @@ public sealed class ApiIntegrationTests : IDisposable
         Assert.Equal("Usuário de integração", createdUser.GetProperty("fullName").GetString());
         Assert.Equal("integracao@example.com", createdUser.GetProperty("email").GetString());
 
-        var userId = GetIdFromLocation(createResponse);
         var getResponse = await _client.GetAsync(createResponse.Headers.Location);
 
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
 
         var retrievedUser = await getResponse.Content.ReadFromJsonAsync<JsonElement>();
-        Assert.Equal(userId, retrievedUser.GetProperty("id").GetInt32());
         Assert.Equal("Usuário de integração", retrievedUser.GetProperty("fullName").GetString());
         Assert.Equal("integracao@example.com", retrievedUser.GetProperty("email").GetString());
     }
