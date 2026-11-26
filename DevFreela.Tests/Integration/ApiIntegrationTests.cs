@@ -62,6 +62,26 @@ public sealed class ApiIntegrationTests : IDisposable
     }
 
     [Fact]
+    public async Task GetProjects_WhenQueryContainsOnlyWhitespace_ShouldReturnAllProjects()
+    {
+        var clientId = await CreateUserAsync("Cliente");
+        var freelancerId = await CreateUserAsync("Freelancer");
+
+        var firstProjectId = await CreateProjectAsync(clientId, freelancerId, "Sistema financeiro");
+        var secondProjectId = await CreateProjectAsync(clientId, freelancerId, "Portal institucional");
+
+        var response = await _client.GetAsync("/api/projects?query=%20%20");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var projects = await response.Content.ReadFromJsonAsync<List<JsonElement>>();
+        Assert.NotNull(projects);
+        Assert.Equal(2, projects.Count);
+        Assert.Contains(projects, project => project.GetProperty("id").GetInt32() == firstProjectId);
+        Assert.Contains(projects, project => project.GetProperty("id").GetInt32() == secondProjectId);
+    }
+
+    [Fact]
     public async Task GetProjects_WhenQueryDoesNotMatch_ShouldReturnEmptyList()
     {
         var clientId = await CreateUserAsync("Cliente");
