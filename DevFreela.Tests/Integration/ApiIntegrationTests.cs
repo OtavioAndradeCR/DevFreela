@@ -38,9 +38,9 @@ public sealed class ApiIntegrationTests : IDisposable
         var clientId = await CreateUserAsync("Cliente");
         var freelancerId = await CreateUserAsync("Freelancer");
 
-        await CreateProjectAsync(clientId, freelancerId, "Sistema financeiro");
+        var firstProjectId = await CreateProjectAsync(clientId, freelancerId, "Sistema financeiro");
         await CreateProjectAsync(clientId, freelancerId, "Portal institucional");
-        await CreateProjectAsync(clientId, freelancerId, "Sistema financeiro mobile");
+        var secondProjectId = await CreateProjectAsync(clientId, freelancerId, "Sistema financeiro mobile");
 
         var response = await _client.GetAsync("/api/projects?query=financeiro");
 
@@ -49,8 +49,15 @@ public sealed class ApiIntegrationTests : IDisposable
         var projects = await response.Content.ReadFromJsonAsync<List<JsonElement>>();
         Assert.NotNull(projects);
         Assert.Equal(2, projects.Count);
-        Assert.Contains(projects, project => project.GetProperty("title").GetString() == "Sistema financeiro");
-        Assert.Contains(projects, project => project.GetProperty("title").GetString() == "Sistema financeiro mobile");
+
+        var firstProject = Assert.Single(projects, project => project.GetProperty("id").GetInt32() == firstProjectId);
+        Assert.Equal("Sistema financeiro", firstProject.GetProperty("title").GetString());
+        Assert.NotEqual(default, firstProject.GetProperty("createdAt").GetDateTime());
+
+        var secondProject = Assert.Single(projects, project => project.GetProperty("id").GetInt32() == secondProjectId);
+        Assert.Equal("Sistema financeiro mobile", secondProject.GetProperty("title").GetString());
+        Assert.NotEqual(default, secondProject.GetProperty("createdAt").GetDateTime());
+
         Assert.DoesNotContain(projects, project => project.GetProperty("title").GetString() == "Portal institucional");
     }
 
